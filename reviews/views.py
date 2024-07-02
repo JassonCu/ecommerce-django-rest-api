@@ -6,10 +6,34 @@ from .models import Review
 
 # Create your views here.
 
+
 class GetProductReviewsView(APIView):
+    """
+    Vista API para obtener todas las reseñas de un producto.
+
+    Permite obtener todas las reseñas de un producto específico ordenadas por fecha de creación.
+    """
+
     permission_classes = (permissions.AllowAny, )
 
     def get(self, request, productId, format=None):
+        """
+        Maneja peticiones GET para obtener reseñas de un producto.
+
+        Args:
+        - request: Objeto de solicitud enviado por el cliente.
+        - productId: ID del producto del cual se desean obtener las reseñas.
+        - format: Sufijo de formato opcional.
+
+        Returns:
+        - Respuesta con reseñas del producto solicitado o mensaje de error.
+
+        Si el producto existe y tiene reseñas, devuelve una respuesta JSON con la lista de reseñas
+        ordenadas por fecha de creación.
+        Si el producto no existe o no tiene reseñas, devuelve una respuesta JSON con un mensaje de
+        error correspondiente.
+        """
+
         try:
             product_id = int(productId)
         except:
@@ -17,14 +41,14 @@ class GetProductReviewsView(APIView):
                 {'error': 'Product ID must be an integer'},
                 status=status.HTTP_404_NOT_FOUND
             )
-        
+
         try:
             if not Product.objects.filter(id=product_id).exists():
                 return Response(
                     {'error': 'This product does not exist'},
                     status=status.HTTP_404_NOT_FOUND
                 )
-            
+
             product = Product.objects.get(id=product_id)
 
             results = []
@@ -44,7 +68,7 @@ class GetProductReviewsView(APIView):
                     item['user'] = review.user.first_name
 
                     results.append(item)
-            
+
             return Response(
                 {'reviews': results},
                 status=status.HTTP_200_OK
@@ -55,10 +79,32 @@ class GetProductReviewsView(APIView):
                 {'error': 'Something went wrong when retrieving reviews'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
-    
+
 
 class GetProductReviewView(APIView):
+    """
+    Vista API para obtener una reseña de un producto por un usuario específico.
+
+    Permite obtener la reseña de un producto realizada por un usuario específico.
+    """
+
     def get(self, request, productId, format=None):
+        """
+        Maneja peticiones GET para obtener una reseña de un producto por un usuario.
+
+        Args:
+        - request: Objeto de solicitud enviado por el cliente.
+        - productId: ID del producto del cual se desea obtener la reseña.
+        - format: Sufijo de formato opcional.
+
+        Returns:
+        - Respuesta con la reseña del producto o mensaje de error.
+
+        Si la reseña existe, devuelve una respuesta JSON con los detalles de la reseña.
+        Si la reseña no existe, devuelve una respuesta JSON con un mensaje de error indicando
+        que la reseña no fue encontrada.
+        """
+
         user = self.request.user
 
         try:
@@ -68,7 +114,7 @@ class GetProductReviewView(APIView):
                 {'error': 'Product ID must be an integer'},
                 status=status.HTTP_404_NOT_FOUND
             )
-        
+
         try:
             if not Product.objects.filter(id=product_id).exists():
                 return Response(
@@ -101,7 +147,29 @@ class GetProductReviewView(APIView):
 
 
 class CreateProductReviewView(APIView):
+    """
+    Vista API para crear una nueva reseña de un producto.
+
+    Permite a un usuario crear una nueva reseña para un producto especificado.
+    """
+
     def post(self, request, productId, format=None):
+        """
+        Maneja peticiones POST para crear una nueva reseña de un producto.
+
+        Args:
+        - request: Objeto de solicitud enviado por el cliente.
+        - productId: ID del producto para el cual se crea la reseña.
+        - format: Sufijo de formato opcional.
+
+        Returns:
+        - Respuesta con la nueva reseña creada o mensaje de error.
+
+        Si la reseña se crea con éxito, devuelve una respuesta JSON con los detalles de la nueva reseña.
+        Si no se proporciona la información necesaria para crear la reseña o si ya existe una reseña para
+        el producto por el usuario, devuelve un mensaje de error correspondiente.
+        """
+
         user = self.request.user
         data = self.request.data
 
@@ -119,7 +187,7 @@ class CreateProductReviewView(APIView):
                 {'error': 'Must pass a comment when creating review'},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        
+
         try:
             if not Product.objects.filter(id=productId).exists():
                 return Response(
@@ -177,10 +245,31 @@ class CreateProductReviewView(APIView):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
-        
 
 class UpdateProductReviewView(APIView):
+    """
+    Vista API para actualizar una reseña de un producto.
+
+    Permite a un usuario actualizar una reseña existente para un producto especificado.
+    """
+
     def put(self, request, productId, format=None):
+        """
+        Maneja peticiones PUT para actualizar una reseña de un producto.
+
+        Args:
+        - request: Objeto de solicitud enviado por el cliente.
+        - productId: ID del producto para el cual se actualiza la reseña.
+        - format: Sufijo de formato opcional.
+
+        Returns:
+        - Respuesta con la reseña actualizada o mensaje de error.
+
+        Si la reseña se actualiza con éxito, devuelve una respuesta JSON con los detalles de la reseña actualizada.
+        Si la reseña no existe o no se proporciona la información necesaria para actualizarla, devuelve un mensaje
+        de error correspondiente.
+        """
+
         user = self.request.user
         data = self.request.data
 
@@ -191,7 +280,7 @@ class UpdateProductReviewView(APIView):
                 {'error': 'Product ID must be an integer'},
                 status=status.HTTP_404_NOT_FOUND
             )
-        
+
         try:
             rating = float(data['rating'])
         except:
@@ -266,7 +355,30 @@ class UpdateProductReviewView(APIView):
 
 
 class DeleteProductReviewView(APIView):
+    """
+    Vista API para eliminar una reseña de un producto.
+
+    Permite a un usuario eliminar su reseña existente para un producto especificado.
+    """
+
     def delete(self, request, productId, format=None):
+        """
+        Maneja peticiones DELETE para eliminar una reseña de un producto.
+
+        Args:
+        - request: Objeto de solicitud enviado por el cliente.
+        - productId: ID del producto para el cual se elimina la reseña.
+        - format: Sufijo de formato opcional.
+
+        Returns:
+        - Respuesta con las reseñas actualizadas después de la eliminación o mensaje de error.
+
+        Si la reseña se elimina con éxito, devuelve una respuesta JSON con las reseñas actualizadas
+        del producto.
+        Si la reseña no existe o no se proporciona la información necesaria para eliminarla, devuelve
+        un mensaje de error correspondiente.
+        """
+
         user = self.request.user
 
         try:
@@ -276,7 +388,7 @@ class DeleteProductReviewView(APIView):
                 {'error': 'Product ID must be an integer'},
                 status=status.HTTP_404_NOT_FOUND
             )
-        
+
         try:
             if not Product.objects.filter(id=product_id).exists():
                 return Response(
@@ -323,9 +435,32 @@ class DeleteProductReviewView(APIView):
 
 
 class FilterProductReviewsView(APIView):
+    """
+    Vista API para filtrar reseñas de un producto por valoración.
+
+    Permite filtrar reseñas de un producto específico según un valor de valoración específico.
+    """
+
     permission_classes = (permissions.AllowAny, )
 
     def get(self, request, productId, format=None):
+        """
+        Maneja peticiones GET para filtrar reseñas de un producto por valoración.
+
+        Args:
+        - request: Objeto de solicitud enviado por el cliente.
+        - productId: ID del producto del cual se desean filtrar las reseñas.
+        - format: Sufijo de formato opcional.
+
+        Returns:
+        - Respuesta con las reseñas filtradas del producto o mensaje de error.
+
+        Si las reseñas existen y se filtran según la valoración, devuelve una respuesta JSON con la lista
+        de reseñas filtradas.
+        Si el producto no existe o no se proporciona una valoración válida, devuelve un mensaje de error
+        correspondiente.
+        """
+        
         try:
             product_id = int(productId)
         except:
@@ -351,7 +486,7 @@ class FilterProductReviewsView(APIView):
                 {'error': 'Rating must be a decimal value'},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        
+
         try:
             if not rating:
                 rating = 5.0
