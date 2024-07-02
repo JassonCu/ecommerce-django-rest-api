@@ -9,7 +9,27 @@ from products.serializers import ProductSerializer
 # Create your views here.
 
 class GetItemsView(APIView):
+    """
+    Vista API para obtener los elementos de la lista de deseos de un usuario.
+
+    Permite a un usuario autenticado recuperar todos los elementos de su lista de deseos.
+    """
+
     def get(self, request, format=None):
+        """
+        Maneja peticiones GET para obtener los elementos de la lista de deseos.
+
+        Args:
+        - request: Objeto de solicitud enviado por el cliente.
+        - format: Sufijo de formato opcional.
+
+        Returns:
+        - Respuesta con los elementos de la lista de deseos o mensaje de error.
+
+        Si la lista de deseos y sus elementos se encuentran, devuelve una respuesta JSON con los elementos de la lista de deseos.
+        Si la lista de deseos no existe o no se pueden recuperar sus elementos, devuelve un mensaje de error correspondiente.
+        """
+
         user = self.request.user
 
         try:
@@ -37,7 +57,26 @@ class GetItemsView(APIView):
 
 
 class AddItemView(APIView):
+    """
+    Vista API para añadir un elemento a la lista de deseos de un usuario.
+
+    Permite a un usuario autenticado añadir un producto específico a su lista de deseos.
+    """
+
     def post(self, request, format=None):
+        """
+        Maneja peticiones POST para añadir un elemento a la lista de deseos.
+
+        Args:
+        - request: Objeto de solicitud enviado por el cliente.
+        - format: Sufijo de formato opcional.
+
+        Returns:
+        - Respuesta con los elementos de la lista de deseos actualizados o mensaje de error.
+
+        Si el producto se añade correctamente a la lista de deseos, devuelve una respuesta JSON con los elementos actualizados.
+        Si el producto no existe, ya está en la lista de deseos o se produce algún error durante el proceso, devuelve un mensaje de error correspondiente.
+        """
         user = self.request.user
         data = self.request.data
 
@@ -118,7 +157,27 @@ class AddItemView(APIView):
 
 
 class GetItemTotalView(APIView):
+    """
+    Vista API para obtener el número total de elementos en la lista de deseos de un usuario.
+
+    Permite a un usuario autenticado obtener el conteo total de elementos en su lista de deseos.
+    """
+
     def get(self, request, format=None):
+        """
+        Maneja peticiones GET para obtener el número total de elementos en la lista de deseos.
+
+        Args:
+        - request: Objeto de solicitud enviado por el cliente.
+        - format: Sufijo de formato opcional.
+
+        Returns:
+        - Respuesta con el número total de elementos en la lista de deseos o mensaje de error.
+
+        Si se encuentra la lista de deseos del usuario, devuelve una respuesta JSON con el total de elementos.
+        Si la lista de deseos no existe o se produce un error durante la operación, devuelve un mensaje de error correspondiente.
+        """
+
         user = self.request.user
 
         try:
@@ -137,7 +196,27 @@ class GetItemTotalView(APIView):
 
 
 class RemoveItemView(APIView):
+    """
+    Vista API para eliminar un elemento de la lista de deseos de un usuario.
+
+    Permite a un usuario autenticado eliminar un producto específico de su lista de deseos.
+    """
+
     def delete(self, request, format=None):
+        """
+        Maneja peticiones DELETE para eliminar un elemento de la lista de deseos.
+
+        Args:
+        - request: Objeto de solicitud enviado por el cliente.
+        - format: Sufijo de formato opcional.
+
+        Returns:
+        - Respuesta con los elementos de la lista de deseos actualizados o mensaje de error.
+
+        Si el producto se elimina correctamente de la lista de deseos, devuelve una respuesta JSON con los elementos actualizados.
+        Si el producto no existe en la lista de deseos o se produce un error durante la operación, devuelve un mensaje de error correspondiente.
+        """
+        
         user = self.request.user
         data = self.request.data
 
