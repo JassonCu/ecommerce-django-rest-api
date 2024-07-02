@@ -7,9 +7,23 @@ from .models import Category
 # Create your views here.
 
 class ListCategoriesView(APIView):
+    """
+    API endpoint para listar todas las categorías y sus subcategorías.
+
+    Este endpoint devuelve una lista de todas las categorías principales
+    junto con sus subcategorías anidadas, si las hay.
+    """
+
     permission_classes = (permissions.AllowAny, )
 
     def get(self, request, format=None):
+        """
+        Obtiene todas las categorías y subcategorías existentes.
+
+        Returns:
+            Response: Lista de categorías y sus subcategorías o mensaje de error si no hay categorías.
+        """
+        
         if Category.objects.all().exists():
             categories = Category.objects.all()
 
