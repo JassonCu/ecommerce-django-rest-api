@@ -9,7 +9,17 @@ from products.serializers import ProductSerializer
 
 
 class GetItemsView(APIView):
+    """
+    API endpoint para obtener los items del carrito de compras de un usuario autenticado.
+    """
+
     def get(self, request, format=None):
+        """
+        Obtiene todos los items del carrito de compras del usuario actual.
+
+        Returns:
+            Response: Lista de items del carrito con detalles o mensaje de error.
+        """
         user = self.request.user
         try:
             cart = Cart.objects.get(user=user)
@@ -37,7 +47,18 @@ class GetItemsView(APIView):
 
 
 class AddItemView(APIView):
+    """
+    API endpoint para agregar un producto al carrito de compras de un usuario.
+    """
+
     def post(self, request, format=None):
+        """
+        Añade un nuevo item al carrito de compras del usuario actual.
+
+        Returns:
+            Response: Lista actualizada de items del carrito con detalles o mensaje de error.
+        """
+
         user = self.request.user
         data = self.request.data
 
@@ -105,7 +126,17 @@ class AddItemView(APIView):
 
 
 class GetTotalView(APIView):
+    """
+    API endpoint para obtener el costo total y el costo comparativo de todos los items en el carrito de compras de un usuario.
+    """
+
     def get(self, request, format=None):
+        """
+        Obtiene el costo total y el costo comparativo de todos los items en el carrito de compras del usuario actual.
+
+        Returns:
+            Response: Costo total y costo comparativo de los items del carrito o mensaje de error.
+        """
         user = self.request.user
 
         try:
@@ -133,7 +164,18 @@ class GetTotalView(APIView):
 
 
 class GetItemTotalView(APIView):
+    """
+    API endpoint para obtener el número total de items en el carrito de compras de un usuario.
+    """
+
     def get(self, request, format=None):
+        """
+        Obtiene el número total de items en el carrito de compras del usuario actual.
+
+        Returns:
+            Response: Número total de items en el carrito o mensaje de error.
+        """
+
         user = self.request.user
 
         try:
@@ -150,7 +192,18 @@ class GetItemTotalView(APIView):
 
 
 class UpdateItemView(APIView):
+    """
+    API endpoint para actualizar la cantidad de un item en el carrito de compras de un usuario.
+    """
+
     def put(self, request, format=None):
+        """
+        Actualiza la cantidad de un item en el carrito de compras del usuario actual.
+
+        Returns:
+            Response: Lista actualizada de items del carrito con detalles o mensaje de error.
+        """
+
         user = self.request.user
         data = self.request.data
 
@@ -218,7 +271,17 @@ class UpdateItemView(APIView):
 
 
 class RemoveItemView(APIView):
+    """
+    API endpoint para eliminar un item del carrito de compras de un usuario.
+    """
+
     def delete(self, request, format=None):
+        """
+        Elimina un item específico del carrito de compras del usuario actual.
+
+        Returns:
+            Response: Lista actualizada de items del carrito con detalles o mensaje de éxito/error.
+        """
         user = self.request.user
         data = self.request.data
 
@@ -275,7 +338,17 @@ class RemoveItemView(APIView):
 
 
 class EmptyCartView(APIView):
+    """
+    API endpoint para vaciar completamente el carrito de compras de un usuario.
+    """
+
     def delete(self, request, format=None):
+        """
+        Elimina todos los items del carrito de compras del usuario actual.
+
+        Returns:
+            Response: Mensaje de éxito si el carrito ya está vacío o lista vacía de items del carrito.
+        """
         user = self.request.user
 
         try:
