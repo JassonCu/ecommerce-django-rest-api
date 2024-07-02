@@ -8,7 +8,26 @@ from .serializers import FixedPriceCouponSerializer, PercentageCouponSerializer
 
 
 class CheckCouponView(APIView):
+    """
+    API endpoint para verificar la validez de un cupón por su nombre.
+
+    Este endpoint permite verificar si un cupón existe y devuelve los detalles del cupón
+    si se encuentra, ya sea un cupón de precio fijo o un cupón de porcentaje.
+    """
+
     def get(self, request, format=None):
+        
+        """
+        Verifica la existencia y detalles de un cupón por su nombre.
+
+        Args:
+            request: Objeto de solicitud HTTP.
+            format: Formato de respuesta deseado (predeterminado es None).
+
+        Returns:
+            Response: Detalles del cupón si se encuentra, o mensaje de error si no se encuentra el cupón.
+        """
+        
         try:
             coupon_name = request.query_params.get('coupon_name')
 
