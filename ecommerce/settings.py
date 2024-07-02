@@ -13,7 +13,8 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 from datetime import timedelta
 import os
 from pathlib import Path
-from decouple import config
+from decouple import config, Csv
+import psycopg2
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -28,7 +29,9 @@ SECRET_KEY = 'django-insecure-v7)g%&n*v5--zo)zv7bo!3+v%$=wb1pw@7^%sv#37n-)34abow
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', cast=Csv())
+
+CURRENT_HOST = config('CURRENT_HOST')
 
 
 # Application definition
@@ -110,11 +113,15 @@ WSGI_APPLICATION = 'ecommerce.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': config('POSTGRES_DB_DATABASE'),
-        'USER': config('POSTGRES_DB_USER'),
-        'PASSWORD': config('POSTGRES_DB_PASSWORD'),
-        'HOST': config('POSTGRES_LOCAL_HOST', default='localhost'),
-        'PORT': config('POSTGRES_LOCAL_PORT', default='5432'),
+        'NAME': config('DATABASE'),
+        'USER': config('DBUSER'),
+        'PASSWORD': config('DBPASSWORD'),
+        'HOST': config('DBHOST'),
+        'PORT': config('DBPORT'),
+        'OPTIONS': {
+            'isolation_level':
+            psycopg2.extensions.ISOLATION_LEVEL_SERIALIZABLE,
+        }
     }
 }
 
