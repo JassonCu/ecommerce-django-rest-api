@@ -1,4 +1,3 @@
-
 import braintree
 from django.conf import settings
 from rest_framework.views import APIView
@@ -22,8 +21,22 @@ gateway = braintree.BraintreeGateway(
     )
 )
 
+
 class GenerateTokenView(APIView):
+    """
+    Vista para generar un token de Braintree para procesamiento de pagos.
+
+    Métodos permitidos: GET
+    """
+
     def get(self, request, format=None):
+        """
+        Genera un token de Braintree y lo devuelve en la respuesta.
+
+        Returns:
+            Response: JSON con el token de Braintree.
+        """
+
         try:
             token = gateway.client_token.generate()
 
@@ -39,10 +52,27 @@ class GenerateTokenView(APIView):
 
 
 class GetPaymentTotalView(APIView):
+    """
+    Vista para obtener el total de pago estimado incluyendo impuestos y costos de envío.
+
+    Métodos permitidos: GET
+    """
+
     def get(self, request, format=None):
+        """
+        Calcula y devuelve el total de pago estimado incluyendo impuestos y costos de envío.
+
+        Query Parameters:
+            shipping_id (int): ID del método de envío seleccionado.
+            coupon_name (str): Nombre del cupón aplicado.
+
+        Returns:
+            Response: JSON con los detalles del total de pago estimado.
+        """
+
         user = self.request.user
 
-        tax = 0.18
+        tax = 0.14  # Guatemala
 
         shipping_id = request.query_params.get('shipping_id')
         shipping_id = str(shipping_id)
@@ -53,13 +83,13 @@ class GetPaymentTotalView(APIView):
         try:
             cart = Cart.objects.get(user=user)
 
-            #revisar si existen iitems
+            # revisar si existen iitems
             if not CartItem.objects.filter(cart=cart).exists():
                 return Response(
                     {'error': 'Need to have items in cart'},
                     status=status.HTTP_404_NOT_FOUND
                 )
-            
+
             cart_items = CartItem.objects.filter(cart=cart)
 
             for cart_item in cart_items:
@@ -73,26 +103,26 @@ class GetPaymentTotalView(APIView):
                         {'error': 'Not enough items in stock'},
                         status=status.HTTP_200_OK
                     )
-                
+
                 total_amount = 0.0
                 total_compare_amount = 0.0
 
                 for cart_item in cart_items:
                     total_amount += (float(cart_item.product.price)
-                                    * float(cart_item.count))
+                                     * float(cart_item.count))
                     total_compare_amount += (float(cart_item.product.compare_price)
-                                            * float(cart_item.count))
+                                             * float(cart_item.count))
 
                 total_compare_amount = round(total_compare_amount, 2)
                 original_price = round(total_amount, 2)
 
                 # Cupones
                 if coupon_name != '':
-                    #Revisar si cupon de precio fijo es valido
+                    # Revisar si cupon de precio fijo es valido
                     if FixedPriceCoupon.objects.filter(name__iexact=coupon_name).exists():
                         fixed_price_coupon = FixedPriceCoupon.objects.get(
-                        name=coupon_name
-                    )
+                            name=coupon_name
+                        )
                     discount_amount = float(fixed_price_coupon.discount_price)
                     if discount_amount < total_amount:
                         total_amount -= discount_amount
@@ -107,10 +137,10 @@ class GetPaymentTotalView(APIView):
 
                         if discount_percentage > 1 and discount_percentage < 100:
                             total_amount -= (total_amount *
-                                            (discount_percentage / 100))
+                                             (discount_percentage / 100))
                             total_after_coupon = total_amount
 
-                #Total despues del cupon 
+                # Total despues del cupon
                 total_after_coupon = round(total_after_coupon, 2)
 
                 # Impuesto estimado
@@ -125,7 +155,6 @@ class GetPaymentTotalView(APIView):
                     shipping = Shipping.objects.get(id=shipping_id)
                     shipping_cost = shipping.price
                     total_amount += float(shipping_cost)
-                
 
                 total_amount = round(total_amount, 2)
 
@@ -148,11 +177,37 @@ class GetPaymentTotalView(APIView):
 
 
 class ProcessPaymentView(APIView):
+    """
+    Vista para procesar un pago utilizando Braintree y crear una orden.
+
+    Métodos permitidos: POST
+    """
+
     def post(self, request, format=None):
+        """
+        Procesa el pago utilizando Braintree y crea una orden asociada.
+
+        Body Parameters:
+            nonce (str): Nonce del método de pago obtenido desde el cliente.
+            shipping_id (int): ID del método de envío seleccionado.
+            coupon_name (str): Nombre del cupón aplicado.
+            full_name (str): Nombre completo del cliente.
+            address_line_1 (str): Dirección línea 1 del cliente.
+            address_line_2 (str): Dirección línea 2 del cliente.
+            city (str): Ciudad del cliente.
+            state_province_region (str): Estado/Provincia/Región del cliente.
+            postal_zip_code (str): Código postal del cliente.
+            country_region (str): País/Región del cliente.
+            telephone_number (str): Número de teléfono del cliente.
+
+        Returns:
+            Response: Estado de la transacción y detalles de la orden.
+        """
+
         user = self.request.user
         data = self.request.data
 
-        tax = 0.18
+        tax = 0.14 # Impuesto para Guatemala
 
         nonce = data['nonce']
         shipping_id = str(data['shipping_id'])
@@ -173,16 +228,17 @@ class ProcessPaymentView(APIView):
                 {'error': 'Invalid shipping option'},
                 status=status.HTTP_404_NOT_FOUND
             )
-        
+
         cart = Cart.objects.get(user=user)
 
-        #revisar si usuario tiene items en carrito
+        # revisar si usuario tiene items en carrito
         if not CartItem.objects.filter(cart=cart).exists():
             return Response(
                 {'error': 'Need to have items in cart'},
                 status=status.HTTP_404_NOT_FOUND
             )
-        
+
+        # Obtener carrito del usuario
         cart_items = CartItem.objects.filter(cart=cart)
 
         # revisar si hay stock
@@ -198,13 +254,13 @@ class ProcessPaymentView(APIView):
                     {'error': 'Not enough items in stock'},
                     status=status.HTTP_200_OK
                 )
-        
+
         total_amount = 0.0
 
         for cart_item in cart_items:
             total_amount += (float(cart_item.product.price)
                              * float(cart_item.count))
-        
+
         # Cupones
         if coupon_name != '':
             if FixedPriceCoupon.objects.filter(name__iexact=coupon_name).exists():
@@ -215,7 +271,7 @@ class ProcessPaymentView(APIView):
 
                 if discount_amount < total_amount:
                     total_amount -= discount_amount
-            
+
             elif PercentageCoupon.objects.filter(name__iexact=coupon_name).exists():
                 percentage_coupon = PercentageCoupon.objects.get(
                     name=coupon_name
@@ -254,23 +310,23 @@ class ProcessPaymentView(APIView):
                 {'error': 'Error processing the transaction'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
-        
+
         if newTransaction.is_success or newTransaction.transaction:
             for cart_item in cart_items:
                 update_product = Product.objects.get(id=cart_item.product.id)
 
-                #encontrar cantidad despues de coompra
+                # encontrar cantidad despues de coompra
                 quantity = int(update_product.quantity) - int(cart_item.count)
 
-                #obtener cantidad de producto por vender
+                # obtener cantidad de producto por vender
                 sold = int(update_product.sold) + int(cart_item.count)
 
-                #actualizar el producto
+                # actualizar el producto
                 Product.objects.filter(id=cart_item.product.id).update(
                     quantity=quantity, sold=sold
                 )
-            
-            #crear orden
+
+            # crear orden
             try:
                 order = Order.objects.create(
                     user=user,
@@ -293,7 +349,7 @@ class ProcessPaymentView(APIView):
                     {'error': 'Transaction succeeded but failed to create the order'},
                     status=status.HTTP_500_INTERNAL_SERVER_ERROR
                 )
-            
+
             for cart_item in cart_items:
                 try:
                     # agarrar el producto
@@ -342,7 +398,7 @@ class ProcessPaymentView(APIView):
                     {'error': 'Transaction succeeded and order successful, but failed to clear cart'},
                     status=status.HTTP_500_INTERNAL_SERVER_ERROR
                 )
-            
+
             return Response(
                 {'success': 'Transaction successful and order was created'},
                 status=status.HTTP_200_OK
