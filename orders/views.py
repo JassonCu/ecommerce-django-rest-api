@@ -5,8 +5,20 @@ from .models import Order, OrderItem
 
 # Create your views here.
 
+
 class ListOrdersView(APIView):
+    """
+    API endpoint para listar órdenes de un usuario autenticado, ordenadas por fecha de emisión.
+    """
+
     def get(self, request, format=None):
+        """
+        Obtiene la lista de órdenes del usuario actual.
+
+        Returns:
+            Response: Lista de órdenes con detalles o mensaje de error.
+        """
+
         user = self.request.user
         try:
             orders = Order.objects.order_by('-date_issued').filter(user=user)
@@ -23,7 +35,7 @@ class ListOrdersView(APIView):
                 item['address_line_2'] = order.address_line_2
 
                 result.append(item)
-            
+
             return Response(
                 {'orders': result},
                 status=status.HTTP_200_OK
@@ -36,12 +48,27 @@ class ListOrdersView(APIView):
 
 
 class ListOrderDetailView(APIView):
+    """
+    API endpoint para obtener detalles de una orden específica basada en su transactionId.
+    """
+
     def get(self, request, transactionId, format=None):
+        """
+        Obtiene detalles específicos de una orden basada en el transactionId.
+
+        Args:
+            transactionId (str): Identificador único de la transacción.
+
+        Returns:
+            Response: Detalles de la orden o mensaje de error si no se encuentra.
+        """
+
         user = self.request.user
 
         try:
             if Order.objects.filter(user=user, transaction_id=transactionId).exists():
-                order = Order.objects.get(user=user, transaction_id=transactionId)
+                order = Order.objects.get(
+                    user=user, transaction_id=transactionId)
                 result = {}
                 result['status'] = order.status
                 result['transaction_id'] = order.transaction_id
@@ -59,7 +86,8 @@ class ListOrderDetailView(APIView):
                 result['shipping_price'] = order.shipping_price
                 result['date_issued'] = order.date_issued
 
-                order_items = OrderItem.objects.order_by('-date_added').filter(order=order)
+                order_items = OrderItem.objects.order_by(
+                    '-date_added').filter(order=order)
                 result['order_items'] = []
 
                 for order_item in order_items:
