@@ -129,17 +129,17 @@ DATABASES = {
 AUTH_USER_MODEL = 'user.UserAccount'
 
 CORS_ORIGIN_WHITELIST = [
-    'http://localhost:5173/',
-    'http://localhost:8000/',
-    'http://127.0.0.1:8000/',
-    'http://127.0.0.1:5173/',
+    'http://localhost:5173',
+    'http://localhost:8000',
+    'http://127.0.0.1:8000',
+    'http://127.0.0.1:5173',
 ]
 
 CSRF_TRUSTED_ORIGINS = [
-    'http://localhost:5173/',
-    'http://localhost:8000/',
-    'http://127.0.0.1:8000/',
-    'http://127.0.0.1:5173/',
+    'http://localhost:5173',
+    'http://localhost:8000',
+    'http://127.0.0.1:8000',
+    'http://127.0.0.1:5173',
 ]
 
 
@@ -188,7 +188,15 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+STATIC_URL = '/static/'
+
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_URL = '/media/'
+
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'build/static')
+]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
