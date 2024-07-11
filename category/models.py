@@ -9,8 +9,9 @@ class Category(models.Model):
         verbose_name_plural = 'Categories'
 
     parent = models.ForeignKey(
-         'self', related_name='children', on_delete=models.CASCADE, blank=True, null=True)
-    name = models.CharField(_('Nombre de categoría'), max_length=255, unique=True)
+        'self', related_name='children', on_delete=models.CASCADE, blank=True, null=True)
+    name = models.CharField(
+        _('Nombre de categoría'), max_length=255, unique=True)
 
     def __str__(self):
         return self.name

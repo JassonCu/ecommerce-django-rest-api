@@ -1,9 +1,9 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager
-import os
 from cart.models import Cart
 from user_profile.models import UserProfile
 from wishlist.models import WishList
+from django.utils.translation import gettext_lazy as _
 
 class UserAccountManager(BaseUserManager):
     def create_user(self, email, password=None, **extra_fields):
@@ -39,11 +39,11 @@ class UserAccountManager(BaseUserManager):
 
 
 class UserAccount(AbstractBaseUser, PermissionsMixin):
-    email = models.EmailField(max_length=255, unique=True)
-    first_name = models.CharField(max_length=255)
-    last_name = models.CharField(max_length=255)
-    is_active = models.BooleanField(default=True)
-    is_staff = models.BooleanField(default=False)
+    email = models.EmailField(max_length=255, unique=True, verbose_name=_('Email'))
+    first_name = models.CharField(max_length=255, verbose_name=_('Nombre'))
+    last_name = models.CharField(max_length=255, verbose_name=_('Apellido'))
+    is_active = models.BooleanField(default=True, verbose_name=_('Activo'))
+    is_staff = models.BooleanField(default=False, verbose_name=_('Staff'))
 
     objects = UserAccountManager()
 
